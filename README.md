@@ -92,3 +92,24 @@ aws s3 cp frontend s3://todo-app-web-aug-2708 --recursive --exclude "*.DS_Store"
 ```
 
 **AWS Console - Créer une distribution CloudFront, OAI, SSL certificate**
+
+
+## Pipeline CI/CD - GitHub Actions
+
+**Créer un utilisateur IAM avec les bonnes permissions sur les resources à déployer/mettre à jour**
+
+```
+AWS_ACCOUNT_ID=REPLACE_ME_ACCOUNT_ID
+
+# Créer l'utilisateur
+aws iam create-user --user-name github-serverless-aug
+
+# Associer la permission Administrator (non recommandé - toujours utiliser le moins de permissions requises)
+aws iam attach-user-policy --user-name github-serverless-aug --policy-arn "arn:aws:iam::aws:policy/AdministratorAccess"
+
+# Créer un Access Key pour l'utilisateur
+aws iam create-access-key --user-name github-serverless-aug > access-key.json
+
+# !!! Supprimer le fichier contenant le Access Key après utilisation
+
+```
