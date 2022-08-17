@@ -1,10 +1,10 @@
 ![cover.png](https://github.com/hpfpv/todo-app-aws/blob/main/blog-post/cover.png)
 
-## Deployment steps
+## Étapes de déploiement
 
 ### Backend
 
-**Update AWS region in functions**
+**Mettre a jour la region AWS dans les functions**
 
 ```
 REGION="REPLACE_ME_AWS_REGION"
@@ -13,7 +13,7 @@ sed -i '.old' "s/REPLACE_ME_AWS_REGION/$REGION/g" backend/attachments-service/fu
 
 ```
 
-**Update application URL in functions (CORS)**
+**Mettre a jour l'URL de l'application dans les functions (CORS)**
 
 ```
 URL="REPLACE_ME_APP_URL"
@@ -22,7 +22,7 @@ sed -i '.old' "s/REPLACE_ME_APP_URL/$URL/g" backend/attachments-service/function
 
 ```
 
-**Update application URL in CloudFormation templates (CORS)**
+**Mettre a jour l'URL de l'application dans le template CloudFormation (CORS)**
 
 ```
 sed -i '.old' "s/REPLACE_ME_APP_URL/$URL/g" backend/main-service/template.yaml
@@ -30,7 +30,7 @@ sed -i '.old' "s/REPLACE_ME_APP_URL/$URL/g" backend/attachments-service/template
 
 ```
 
-**Mention the name of the CloudFormation stack**
+**Mentionner le nom du stack CloudFormation**
 
 ```
 MAIN_STACK_NAME="todo-app-main-stack"
@@ -43,7 +43,7 @@ sed -i '.old' "s/REPLACE_ME_FILES_STACK_NAME/$FILES_STACK_NAME/g" backend/attach
 
 ```
 
-**Deploy the main service stack**
+**Déployer le main service stack**
 
 ```
 cd backend/main-service
@@ -52,7 +52,7 @@ sam deploy --guided
 
 ```
 
-**Deploy the attachement service stack**
+**Déployer le attachement service stack**
 
 ```
 cd ../attachments-service
@@ -60,23 +60,23 @@ sam build -t template.yaml
 sam deploy --guided --capabilities CAPABILITY_NAMED_IAM
 
 ```
-> Capabilities **CAPABILITY_NAMED_IAM** for creating IAM roles and policies with names defined in the CloudFormation stack.
+> Capabilities **CAPABILITY_NAMED_IAM** pour la création de roles et polices IAM avec des noms definis dans le stack CloudFormation.
 
-**Uncomment lines 88-89 and 111-114 in the main service template and deploy the stack again**
+**Retirer les commentaires des lignes 88-89 et 111-114 dans le main service template et déployer le stack à nouveau**
 
 
 ### Frontend
 
-**Create the S3 bucket to serve as a static website**
+**Créer le bucket S3 pour servir de site web static**
 
 ```
 aws s3 mb s3://todo-app-web-aug-2708 --region=$REGION
 
 ```
 
-**Replace all necessary fields in the script.js file (see CloudFormation Outputs)**
+**Remplacer tous les champs necessaires dans le fichier script.js (voir CloudFormation Outputs)**
 
-To get stack Outputs without going to the AWS console:
+Pour obtenir les Outputs des stacks sans aller dans la console AWS:
 
 ```
 aws cloudformation describe-stacks --stack-name $MAIN_STACK_NAME --region $REGION > backend/main-service/main-output.json
@@ -84,32 +84,32 @@ aws cloudformation describe-stacks --stack-name $FILES_STACK_NAME --region $REGI
 
 ```
 
-**Copy the contents of the frontend folder to the S3 bucket**
+**Copier le contenu du dossier frontend dans le bucket s3**
 
 ```
 aws s3 cp frontend s3://todo-app-web-aug-2708 --recursive --exclude "*.DS_Store" --region=$REGION
 
 ```
 
-**AWS Console - Create a CloudFront distribution, OAI, SSL certificate**
+**AWS Console - Créer une distribution CloudFront, OAI, SSL certificate**
 
 
-## CI/CD Pipeline - GitHub Actions
+## Pipeline CI/CD - GitHub Actions
 
-**Create an IAM user with the right permissions set on the resources to deploy/update**
+**Créer un utilisateur IAM avec les bonnes permissions sur les resources à déployer/mettre à jour**
 
 ```
 AWS_ACCOUNT_ID=REPLACE_ME_ACCOUNT_ID
 
-# Create the user
+# Créer l'utilisateur
 aws iam create-user --user-name github-serverless-aug
 
-# Associate the Administrator permission (not recommended - always use the least privileges)
+# Associer la permission Administrator (non recommandé - toujours utiliser le moins de permissions requises)
 aws iam attach-user-policy --user-name github-serverless-aug --policy-arn "arn:aws:iam::aws:policy/AdministratorAccess"
 
-# Create an access key for the user
+# Créer un Access Key pour l'utilisateur
 aws iam create-access-key --user-name github-serverless-aug > access-key.json
 
-# !!! Delete the file containing the Access Key after use
+# !!! Supprimer le fichier contenant le Access Key après utilisation
 
 ```
